@@ -25,7 +25,6 @@ let package = Package(
         .package(url: "git@github.com:google/GTMAppAuth.git", from: "5.0.0"),
         
         .package(url: "git@github.com:tyh94/MKVNetwork.git", from: "1.0.0"),
-        .package(url: "git@github.com:tyh94/Dependencies.git", from: "1.0.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -36,7 +35,6 @@ let package = Package(
                 .product(name: "YandexLoginSDK", package: "yandex-login-sdk-ios"),
                 .product(name: "ZIPFoundation", package: "ZIPFoundation"),
                 .product(name: "MKVNetwork", package: "MKVNetwork"),
-                .product(name: "Dependencies", package: "Dependencies"),
                 
                 .product(name: "GoogleSignIn", package: "GoogleSignIn-iOS"),
             ]

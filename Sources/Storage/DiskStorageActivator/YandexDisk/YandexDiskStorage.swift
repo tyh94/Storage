@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 import YandexLoginSDK
 import MKVNetwork
-import Dependencies
 
 final class YandexDiskStorage: DiskStorageActivator {
     enum StorageError: Error {

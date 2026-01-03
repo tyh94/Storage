@@ -1,5 +1,5 @@
 {
-  "originHash" : "813aba0fa05974db67c7958f09b12fa84c331f0051c00da91f71024436af360b",
+  "originHash" : "3d0d4d574bd64bd310a5fb4d68699a409a3e03f47ea4924ff6bf62aec255abd8",
   "pins" : [
     {
       "identity" : "app-check",
@@ -17,15 +17,6 @@
       "state" : {
         "revision" : "145104f5ea9d58ae21b60add007c33c1cc0c948e",
         "version" : "2.0.0"
-      }
-    },
-    {
-      "identity" : "dependencies",
-      "kind" : "remoteSourceControl",
-      "location" : "git@github.com:tyh94/Dependencies.git",
-      "state" : {
-        "revision" : "1a747426856e4031048f983bf959fac286db07a5",
-        "version" : "1.0.0"
       }
     },
     {
