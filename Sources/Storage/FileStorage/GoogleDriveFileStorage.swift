@@ -51,16 +51,23 @@ final class GoogleDriveFileStorage: FileStorage, @unchecked Sendable {
         self.network = network
     }
     
-    func resource(fileName: String) async throws -> StorageResource {
-        try await findFileResource(name: fileName, inFolder: rootPath)
+    func resource(
+        fileName: String,
+        at resource: StorageResource?
+    ) async throws -> StorageResource {
+        let folderId = folderId(at: resource)
+        return try await findFileResource(name: fileName, inFolder: folderId)
     }
     
-    func resource(folderName: String) async throws -> StorageResource {
-        guard let folderId = try await findFolderId(name: folderName, in: rootPath) else {
+    func resource(
+        folderName: String,
+        at resource: StorageResource?
+    ) async throws -> StorageResource {
+        let folderId = folderId(at: resource)
+        guard let folderId = try await findFolderId(name: folderName, in: folderId) else {
             throw StorageError.fileNotFound(folderName)
         }
         
-        // Создаем StorageResource только с базовой информацией
         return StorageResource(
             id: folderId,
             name: folderName,
@@ -200,15 +207,18 @@ final class GoogleDriveFileStorage: FileStorage, @unchecked Sendable {
         return convertToStorageResource(file, parent: resource)
     }
     
+    private func folderId(at resource: StorageResource?) -> String {
+        if let resource = resource, !resource.path.isEmpty {
+            return resource.id
+        } else {
+            return rootPath
+        }
+    }
+    
     func createFile(at resource: StorageResource?, fileName: String, with data: Data?) async throws -> StorageResource {
         logger?.logGoogle("Creating file at: \(resource?.path ?? "root") fileName: \(fileName)", level: .info)
         
-        let folderId: String
-        if let resource = resource, !resource.path.isEmpty {
-            folderId = resource.id
-        } else {
-            folderId = rootPath
-        }
+        let folderId = folderId(at: resource)
         if let _ = try? await findFileResource(name: fileName, inFolder: folderId) {
             throw StorageError.fileAlreadyExists(name: fileName)
         }

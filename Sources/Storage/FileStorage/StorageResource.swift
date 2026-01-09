@@ -19,6 +19,15 @@ public struct StorageResource: Identifiable, Sendable, Hashable, Codable {
     public let type: ItemType
     public let modified: String
     
+    public var isFile: Bool {
+        switch type {
+        case .dir:
+            return false
+        case .file:
+            return true
+        }
+    }
+    
     public init(
         id: String = UUID().uuidString,
         name: String,

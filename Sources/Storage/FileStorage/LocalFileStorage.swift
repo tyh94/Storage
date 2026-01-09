@@ -46,17 +46,37 @@ final class LocalFileStorage: FileStorage  {
         logger?.logLocal("📁 rootURL: \(rootURL)", level: .debug)
     }
     
-    func resource(fileName: String) async throws -> StorageResource {
-        let destinationURL = rootURL.appendingPathComponent(fileName)
+    private func destinationURL(resource: StorageResource?) -> URL {
+        if let path = resource?.path {
+            return rootURL.appendingPathComponent(path)
+        } else {
+            return rootURL
+        }
+    }
+    
+    func resource(
+        fileName: String,
+        at resource: StorageResource?
+    ) async throws -> StorageResource {
+        let destinationURL = destinationURL(resource: resource).appendingPathComponent(fileName)
         if fileManager.fileExists(atPath: destinationURL.path) {
-            return StorageResource(name: fileName, path: fileName, type: .file(url: "", previewURL: ""), modified: "")
+            return StorageResource(
+                name: fileName,
+                path: [resource?.path, fileName].compactMap(\.self).joined(separator: "/"),
+                type: .file(url: "", previewURL: ""),
+                modified: ""
+            )
         } else {
             throw Error.fileNotFound(fileName)
         }
     }
     
-    func resource(folderName: String) async throws -> StorageResource {
-        let folderURL = rootURL.appendingPathComponent(folderName)
+    func resource(
+        folderName: String,
+        at resource: StorageResource?
+    ) async throws -> StorageResource {
+        let destinationURL = destinationURL(resource: resource)
+        let folderURL = destinationURL.appendingPathComponent(folderName)
         
         var isDirectory: ObjCBool = false
         guard fileManager.fileExists(atPath: folderURL.path, isDirectory: &isDirectory) else {
@@ -104,12 +124,7 @@ final class LocalFileStorage: FileStorage  {
         offsetToken: String?
     ) async throws -> (resources: [StorageResource], nextOffsetToken: String?) {
         logger?.logLocal("Fetching resources at: \(resource?.path ?? "")", level: .debug)
-        let destinationURL: URL
-        if let path = resource?.path {
-            destinationURL = rootURL.appendingPathComponent(path)
-        } else {
-            destinationURL = rootURL
-        }
+        let destinationURL = destinationURL(resource: resource)
         
         do {
             let subpaths = try fileManager.contentsOfDirectory(

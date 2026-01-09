@@ -8,8 +8,14 @@
 import Foundation
 
 public protocol FileStorage: Sendable {
-    func resource(fileName: String) async throws -> StorageResource
-    func resource(folderName: String) async throws -> StorageResource
+    func resource(
+        fileName: String,
+        at resource: StorageResource?
+    ) async throws -> StorageResource
+    func resource(
+        folderName: String,
+        at resource: StorageResource?
+    ) async throws -> StorageResource
     func data(for resource: StorageResource) async throws -> Data
     func getFolder(at folderName: String) async throws -> StorageResource
     func getResources(
@@ -34,5 +40,14 @@ public protocol FileStorage: Sendable {
 extension FileStorage {
     public func getResources(at resource: StorageResource?) async throws -> (resources: [StorageResource], nextOffsetToken: String?) {
         try await getResources(at: resource, limit: 20, offsetToken: nil)
+    }
+    
+    @discardableResult
+    public func createFolderIfNeeded(at folderName: String, at atResource: StorageResource?) async throws -> StorageResource {
+        do {
+            return try await resource(folderName: folderName, at: atResource)
+        } catch {
+            return try await createFolder(at: atResource, folderName: folderName)
+        }
     }
 }

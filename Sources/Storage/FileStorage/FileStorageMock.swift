@@ -10,11 +10,17 @@ import Foundation
 public struct FileStorageMock: FileStorage {
     public init() {}
     
-    public func resource(fileName: String) async throws -> StorageResource {
+    public func resource(
+        fileName: String,
+        at resource: StorageResource?
+    ) async throws -> StorageResource {
         StorageResource(name: "", path: "", type: .dir, modified: "")
     }
     
-    public func resource(folderName: String) async throws -> StorageResource {
+    public func resource(
+        folderName: String,
+        at resource: StorageResource?
+    ) async throws -> StorageResource {
         StorageResource(name: "", path: "", type: .dir, modified: "")
     }
     

@@ -39,11 +39,14 @@ final class YandexFileStorage: FileStorage {
     }
     
     // MARK: - FileStorage методы
-    func resource(fileName: String) async throws -> StorageResource {
+    func resource(
+        fileName: String,
+        at resource: StorageResource?
+    ) async throws -> StorageResource {
         var offsetToken: String? = nil
 
         repeat {
-            let page = try await getResources(at: nil, limit: 100, offsetToken: offsetToken)
+            let page = try await getResources(at: resource, limit: 100, offsetToken: offsetToken)
 
             if let found = page.resources.first(where: { $0.name == fileName }) {
                 return found
@@ -55,11 +58,14 @@ final class YandexFileStorage: FileStorage {
         throw StorageError.fileNotFound(fileName)
     }
     
-    func resource(folderName: String) async throws -> StorageResource {
+    func resource(
+        folderName: String,
+        at resource: StorageResource?
+    ) async throws -> StorageResource {
         var offsetToken: String? = nil
 
         repeat {
-            let page = try await getResources(at: nil, limit: 100, offsetToken: offsetToken)
+            let page = try await getResources(at: resource, limit: 100, offsetToken: offsetToken)
 
             if let found = page.resources.first(where: {
                 $0.name == folderName && $0.type == .dir
