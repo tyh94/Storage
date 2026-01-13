@@ -7,7 +7,29 @@
 
 import Foundation
 
-public struct FileStorageMock: FileStorage {
+public final class FileStorageMock: FileStorage, @unchecked Sendable {
+    private var resources: [StorageResource] = [
+        StorageResource(name: "Testfolder", path: "Test", type: .dir, modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+        StorageResource(name: "File.jpg", path: "Test", type: .file(url: "", previewURL: nil), modified: ""),
+    ]
     public init() {}
     
     public func resource(
@@ -29,11 +51,15 @@ public struct FileStorageMock: FileStorage {
     }
     
     public func createFolder(at resource: StorageResource?, folderName: String) async throws -> StorageResource {
-        StorageResource(name: "", path: "", type: .dir, modified: "")
+        let folder = StorageResource(name: folderName, path: "", type: .dir, modified: "")
+        resources.append(folder)
+        return folder
     }
     
     public func createFile(at resource: StorageResource?, fileName: String, with data: Data?) async throws -> StorageResource {
-        StorageResource(name: "", path: "", type: .dir, modified: "")
+        let file = StorageResource(name: fileName, path: "", type: .file(url: "", previewURL: nil), modified: "")
+        resources.append(file)
+        return file
     }
     
     public func updateFile(at resource: StorageResource, with data: Data) async throws {
@@ -65,7 +91,7 @@ public struct FileStorageMock: FileStorage {
         offsetToken: String?
     ) async throws -> (resources: [StorageResource], nextOffsetToken: String?) {
         if offsetToken == nil {
-            return ([StorageResource(name: "Test", path: "Test", type: .dir, modified: "")], nil)
+            return (resources, nil)
         }
         return ([], nil)
     }

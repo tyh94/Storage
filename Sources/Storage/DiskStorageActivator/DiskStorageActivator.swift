@@ -5,7 +5,7 @@
 //  Created by Татьяна Макеева on 03.03.2025.
 //
 
-import SwiftUI
+import Foundation
 
 public protocol DiskStorageActivator: Sendable {
     var startPath: String { get }
