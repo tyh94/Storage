@@ -17,12 +17,12 @@ let package = Package(
         .package(url: "git@github.com:yandexmobile/yandex-login-sdk-ios.git", from: "3.0.2"),
         .package(url: "git@github.com:weichsel/ZIPFoundation.git", from: "0.9.19"),
         
-        .package(url: "git@github.com:google/GoogleSignIn-iOS.git", from: "9.0.0"),
-        .package(url: "git@github.com:google/gtm-session-fetcher.git", from: "3.3.0"),
+        .package(url: "git@github.com:google/GoogleSignIn-iOS.git", from: "9.1.0"),
+        .package(url: "git@github.com:google/gtm-session-fetcher.git", from: "3.5.0"),
         .package(url: "git@github.com:google/GoogleUtilities.git", from: "8.1.0"),
         .package(url: "git@github.com:google/promises.git", from: "2.4.0"),
         .package(url: "git@github.com:openid/AppAuth-iOS.git", from: "2.0.0"),
-        .package(url: "git@github.com:google/app-check.git", from: "11.2.0"),
+        .package(url: "git@github.com:google/app-check.git", from: "11.0.0"),
         .package(url: "git@github.com:google/GTMAppAuth.git", from: "5.0.0"),
         
         .package(url: "git@github.com:tyh94/MKVNetwork.git", from: "1.0.0"),
