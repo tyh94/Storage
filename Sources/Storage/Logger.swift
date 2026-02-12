@@ -31,7 +31,7 @@ public protocol Logger: Sendable {
 }
 
 extension Logger {
-    func debug(
+    public func debug(
         _ message: String,
         type: LogMessageType,
         file: String = #file,
@@ -41,7 +41,7 @@ extension Logger {
         log(message, level: .debug, type: type, file: file, function: function, line: line)
     }
 
-    func info(
+    public func info(
         _ message: String,
         type: LogMessageType,
         file: String = #file,
@@ -51,7 +51,7 @@ extension Logger {
         log(message, level: .info, type: type, file: file, function: function, line: line)
     }
 
-    func warning(
+    public func warning(
         _ message: String,
         type: LogMessageType,
         file: String = #file,
@@ -61,7 +61,7 @@ extension Logger {
         log(message, level: .warning, type: type, file: file, function: function, line: line)
     }
 
-    func error(
+    public func error(
         _ message: String,
         type: LogMessageType,
         file: String = #file,
@@ -71,7 +71,7 @@ extension Logger {
         log(message, level: .error, type: type, file: file, function: function, line: line)
     }
 
-    func error(
+    public func error(
         _ error: Error,
         type: LogMessageType,
         file: String = #file,

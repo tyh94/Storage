@@ -70,7 +70,7 @@ final class YandexDiskStorage: DiskStorageActivator {
             try YandexLoginSDK.shared.handleOpenURL(url)
             return true
         } catch {
-            logger?.error("Handler URL failed: \(error)", type: .yandex)
+            logger?.error("Handler URL failed: \(error.localizedDescription)", type: .yandex)
             return false
         }
     }

@@ -34,15 +34,12 @@ struct SetupDiskStorageView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case let .error(error):
             VStack {
-                Text.localized(
-                    "Error: %@",
-                    error.localizedDescription
-                )
+                Text("Error: \(error.localizedDescription)", bundle: .module)
                 .foregroundColor(.red)
                 Button {
                     Task { await viewModel.onAppear() }
                 } label: {
-                    Text.localized("Retry")
+                    Text("Retry", bundle: .module)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

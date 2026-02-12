@@ -46,7 +46,7 @@ public struct AvailableStorageSetupView: View {
                         selectedStorage = StorageSetupWrapper(storage)
                     }
             }
-            .navigationTitle("Setup storage".localized)
+            .navigationTitle(Text("Setup storage", bundle: .module))
         }
         .sheet(item: $selectedStorage) { setup in
             SetupDiskStorageView(
@@ -55,7 +55,6 @@ public struct AvailableStorageSetupView: View {
                     tokenStorage: setup.tokenStorage,
                     fileStorageBuilder: setup.storageBuilder,
                     folderChosen: {
-                        selectedStorage = nil
                         dismiss()
                         viewModel.complete(
                             resource: $0,

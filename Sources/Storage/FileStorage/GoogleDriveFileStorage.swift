@@ -301,7 +301,7 @@ final class GoogleDriveFileStorage: FileStorage, @unchecked Sendable {
             )
             logger?.logGoogle("Successfully renamed file from \(resource.name) to \(filename)", level: .debug)
         } catch {
-            logger?.logGoogle("Failed to rename file from \(resource.name) to \(filename): \(error)", level: .error)
+            logger?.logGoogle("Failed to rename file from \(resource.name) to \(filename): \(error.localizedDescription)", level: .error)
             throw error
         }
     }
@@ -325,7 +325,7 @@ final class GoogleDriveFileStorage: FileStorage, @unchecked Sendable {
             )
             logger?.logGoogle("Successfully renamed folder from \(resource.name) to \(filename)", level: .debug)
         } catch {
-            logger?.logGoogle("Failed to rename folder from \(resource.name) to \(filename): \(error)", level: .error)
+            logger?.logGoogle("Failed to rename folder from \(resource.name) to \(filename): \(error.localizedDescription)", level: .error)
             throw error
         }
     }

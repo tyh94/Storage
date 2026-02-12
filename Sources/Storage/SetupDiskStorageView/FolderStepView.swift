@@ -39,7 +39,7 @@ struct FolderStepView: View {
         }
         .listStyle(.plain)
         .navigationBarBackButtonHidden()
-        .navigationTitle((step.current.name.isEmpty ? "Root" : step.current.name).localized)
+        .navigationTitle(step.current.name.isEmpty ? Text("Root", bundle: .module) : Text(step.current.name))
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             if viewModel.path.count > 1 {
@@ -49,35 +49,40 @@ struct FolderStepView: View {
                     } label: {
                         HStack {
                             Image(systemName: "chevron.backward")
-                            Text("Back")
+                            Text("Back", bundle: .module)
                         }
                     }
                 }
             }
             
             if case .loaded = viewModel.status {
-                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingAlertAddFolder = true
                     } label: {
-                        Label("Add folder", systemImage: "folder.badge.plus")
-                            .frame(maxWidth: .infinity)
+                        Label {
+                            Text("Add folder", bundle: .module)
+                        } icon: {
+                            Image(systemName: "folder.badge.plus")
+                        }
+                        .frame(maxWidth: .infinity)
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Select") {
+                    Button {
                         Task {
                             await viewModel.saveCurrentFolder()
                         }
+                    } label: {
+                        Text("Select", bundle: .module)
                     }
                 }
             }
         }
-        .alert("Enter folder name", isPresented: $showingAlertAddFolder) {
-            TextField("Enter folder name", text: $folderName)
-            Button("Cancel", action: { showingAlertAddFolder = false })
-            Button("Add", action: createFolder).disabled(folderName.isEmpty)
+        .alert(Text("Enter folder name", bundle: .module), isPresented: $showingAlertAddFolder) {
+            TextField(String(localized: "Enter folder name", bundle: .module), text: $folderName)
+            Button(String(localized: "Cancel", bundle: .module), action: { showingAlertAddFolder = false })
+            Button(String(localized: "Add", bundle: .module), action: createFolder).disabled(folderName.isEmpty)
         }
     }
     

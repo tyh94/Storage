@@ -103,7 +103,7 @@ final class LocalFileStorage: FileStorage  {
             logger?.logLocal("Successfully loaded data for fileName: \(fileName)", level: .debug)
             return data
         } catch {
-            logger?.logLocal("Failed to load data for fileName: \(fileName): \(error)", level: .error)
+            logger?.logLocal("Failed to load data for fileName: \(fileName): \(error.localizedDescription)", level: .error)
             throw error
         }
     }
@@ -145,7 +145,7 @@ final class LocalFileStorage: FileStorage  {
                 )
             }, nil)
         } catch {
-            logger?.logLocal("Failed to get resources at \(destinationURL): \(error)", level: .error)
+            logger?.logLocal("Failed to get resources at \(destinationURL): \(error.localizedDescription)", level: .error)
             throw error
         }
     }
@@ -176,7 +176,7 @@ final class LocalFileStorage: FileStorage  {
             logger?.logLocal("Folder created successfully: \(path)", level: .info)
             return StorageResource(name: folderName, path: path, type: .dir, modified: "")
         } catch {
-            logger?.logLocal("Failed to create folder: \(path) - \(error)", level: .error)
+            logger?.logLocal("Failed to create folder: \(path) - \(error.localizedDescription)", level: .error)
             throw error
         }
     }
@@ -214,7 +214,7 @@ final class LocalFileStorage: FileStorage  {
                 try createFile(at: path, with: data)
             }
         } catch {
-            logger?.logLocal("File update failed: \(path) - \(error)", level: .error)
+            logger?.logLocal("File update failed: \(path) - \(error.localizedDescription)", level: .error)
             throw error
         }
     }
@@ -231,7 +231,7 @@ final class LocalFileStorage: FileStorage  {
             try fileManager.moveItem(at: sourceURL, to: destinationURL)
             logger?.logLocal("Successfully renamed file from \(resource.name) to \(filename)", level: .debug)
         } catch {
-            logger?.logLocal("Failed to rename file from \(resource.name) to \(filename): \(error)", level: .error)
+            logger?.logLocal("Failed to rename file from \(resource.name) to \(filename): \(error.localizedDescription)", level: .error)
             throw error
         }
     }
@@ -258,7 +258,7 @@ final class LocalFileStorage: FileStorage  {
             try fileManager.moveItem(at: sourceURL, to: destinationURL)
             logger?.logLocal("Successfully renamed folder from \(resource.name) to \(filename)", level: .debug)
         } catch {
-            logger?.logLocal("Failed to rename folder from \(resource.name) to \(filename): \(error)", level: .error)
+            logger?.logLocal("Failed to rename folder from \(resource.name) to \(filename): \(error.localizedDescription)", level: .error)
             throw error
         }
     }
@@ -272,7 +272,7 @@ final class LocalFileStorage: FileStorage  {
             )
             logger?.logLocal("File moved successfully", level: .info)
         } catch {
-            logger?.logLocal("File move failed: \(error)", level: .error)
+            logger?.logLocal("File move failed: \(error.localizedDescription)", level: .error)
             throw error
         }
     }
@@ -284,7 +284,7 @@ final class LocalFileStorage: FileStorage  {
             try fileManager.removeItem(at: rootURL.appendingPathComponent(path))
             logger?.logLocal("Item deleted successfully: \(path)", level: .info)
         } catch {
-            logger?.logLocal("Delete failed for \(path): \(error)", level: .error)
+            logger?.logLocal("Delete failed for \(path): \(error.localizedDescription)", level: .error)
             throw error
         }
     }
@@ -295,7 +295,7 @@ final class LocalFileStorage: FileStorage  {
             try fileManager.removeItem(at: rootURL)
             logger?.logLocal("All items deleted successfully", level: .info)
         } catch {
-            logger?.logLocal("Delete all failed: \(error)", level: .error)
+            logger?.logLocal("Delete all failed: \(error.localizedDescription)", level: .error)
             throw error
         }
     }
