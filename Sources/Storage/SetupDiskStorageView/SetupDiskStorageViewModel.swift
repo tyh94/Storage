@@ -27,6 +27,7 @@ final class SetupDiskStorageViewModel {
         case error(String)
     }
     
+    let storageName: LocalizedStringKey
     private(set) var status: Status = .idle
     var path: [Step] = []
     private let pageSize: Int = 20
@@ -38,11 +39,13 @@ final class SetupDiskStorageViewModel {
     private let folderChosen: (StorageResource) -> Void
     
     init(
+        storageName: LocalizedStringKey,
         diskActivator: DiskStorageActivator,
         tokenStorage: TokenStorage,
         fileStorageBuilder: @escaping (StorageResource) -> (FileStorage),
         folderChosen: @escaping (StorageResource) -> Void
     ) {
+        self.storageName = storageName
         self.diskActivator = diskActivator
         self.tokenStorage = tokenStorage
         self.fileStorageBuilder = fileStorageBuilder

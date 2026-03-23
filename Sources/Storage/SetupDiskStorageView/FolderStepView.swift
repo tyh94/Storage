@@ -13,17 +13,29 @@ struct FolderStepView: View {
     @State private var showingAlertAddFolder = false
     @Environment(\.dismiss) private var dismiss
     @State private var folderName = ""
+    @State private var searchText = ""
+    @FocusState private var isSearchFocused: Bool
+    
+    var filteredResources: [StorageResource] {
+        if searchText.isEmpty {
+            return step.resources
+        } else {
+            return step.resources.filter { resource in
+                resource.name.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
     
     var body: some View {
         List {
-            ForEach(step.resources) { resource in
+            ForEach(filteredResources) { resource in
                 ResourceRow(resource: resource, isSelectable: true) {
                     Task {
                         await viewModel.loadFolder(resource)
                     }
                 }
                 .onAppear {
-                    if resource == step.resources.last,
+                    if resource == filteredResources.last,
                        step.nextOffsetToken != nil {
                         Task {
                             await viewModel.loadNextPage(for: step.current)
@@ -39,12 +51,23 @@ struct FolderStepView: View {
         }
         .listStyle(.plain)
         .navigationBarBackButtonHidden()
-        .navigationTitle(step.current.name.isEmpty ? Text("Root", bundle: .module) : Text(step.current.name))
+        .navigationTitle(step.current.name.isEmpty ? Text(viewModel.storageName) : Text(step.current.name))
         .navigationBarTitleDisplayMode(.large)
+        .searchable(
+            text: $searchText,
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: Text("Search", bundle: .module)
+        )
+        .focused($isSearchFocused)
+        .onSubmit(of: .search) {
+            isSearchFocused = false
+        }
         .toolbar {
             if viewModel.path.count > 1 {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
+                        isSearchFocused = false
+                        searchText = ""
                         viewModel.goBack()
                     } label: {
                         HStack {
@@ -58,6 +81,7 @@ struct FolderStepView: View {
             if case .loaded = viewModel.status {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
+                        isSearchFocused = false
                         showingAlertAddFolder = true
                     } label: {
                         Label {
@@ -71,6 +95,7 @@ struct FolderStepView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         Task {
+                            isSearchFocused = false
                             await viewModel.saveCurrentFolder()
                         }
                     } label: {
@@ -101,6 +126,7 @@ import MKVNetwork
     NavigationStack {
         FolderStepView(
             viewModel: SetupDiskStorageViewModel(
+                storageName: "Test",
                 diskActivator: DiskStorageActivatorMock(),
                 tokenStorage: TokenStorageMock(),
                 fileStorageBuilder: { _ in FileStorageMock() },

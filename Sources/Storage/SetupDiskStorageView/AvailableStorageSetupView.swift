@@ -51,6 +51,7 @@ public struct AvailableStorageSetupView: View {
         .sheet(item: $selectedStorage) { setup in
             SetupDiskStorageView(
                 viewModel: SetupDiskStorageViewModel(
+                    storageName: setup.name,
                     diskActivator: setup.activator,
                     tokenStorage: setup.tokenStorage,
                     fileStorageBuilder: setup.storageBuilder,

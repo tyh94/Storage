@@ -59,6 +59,7 @@ import MKVNetwork
 #Preview {
     SetupDiskStorageView(
         viewModel: SetupDiskStorageViewModel(
+            storageName: "Test",
             diskActivator: DiskStorageActivatorMock(),
             tokenStorage: TokenStorageMock(),
             fileStorageBuilder: { _ in FileStorageMock() },
