@@ -64,16 +64,16 @@ final class GoogleDriveFileStorage: FileStorage, @unchecked Sendable {
         at resource: StorageResource?
     ) async throws -> StorageResource {
         let folderId = folderId(at: resource)
-        guard let folderId = try await findFolderId(name: folderName, in: folderId) else {
+        guard let folder = try await findFolder(name: folderName, in: folderId) else {
             throw StorageError.fileNotFound(folderName)
         }
         
         return StorageResource(
-            id: folderId,
+            id: folder.id,
             name: folderName,
             path: folderName,
             type: .dir,
-            modified: ""
+            modified: folder.modifiedTime ?? Date.distantPast
         )
     }
     
@@ -173,12 +173,14 @@ final class GoogleDriveFileStorage: FileStorage, @unchecked Sendable {
         }
         let path = [parent?.path, file.name].compactMap { $0 }.joined(separator: "/")
         
+        let modifiedDate = file.modifiedTime ?? Date.distantPast
+        
         return StorageResource(
             id: file.id,
             name: file.name,
             path: path,
             type: type,
-            modified: file.modifiedTime?.formatted() ?? ""
+            modified: modifiedDate
         )
     }
     
@@ -382,13 +384,12 @@ final class GoogleDriveFileStorage: FileStorage, @unchecked Sendable {
         let components = normalizedPath.split(separator: "/").map(String.init)
         var currentFolderId = "root" // Начинаем с корневой папки
         
-        // Рекурсивно ищем каждую папку в пути
         for component in components {
-            guard let nextId = try await findFolderId(
+            guard let nextId = try await findFolder(
                 name: component,
                 in: currentFolderId
-            ) else {
-                return nil // Папка не найдена
+            )?.id else {
+                return nil
             }
             currentFolderId = nextId
         }
@@ -425,7 +426,7 @@ final class GoogleDriveFileStorage: FileStorage, @unchecked Sendable {
         }
     }
 
-    private func findFolderId(name: String, in parentId: String) async throws -> String? {
+    private func findFolder(name: String, in parentId: String) async throws -> GoogleDriveFile? {
         let url = baseURL.appendingPathComponent("files")
         let escapedName = name.replacingOccurrences(of: "'", with: "\\'")
         
@@ -447,7 +448,7 @@ final class GoogleDriveFileStorage: FileStorage, @unchecked Sendable {
             method: .get,
             parameters: .query(parameters)
         )
-        return response.files.first?.id
+        return response.files.first
     }
     
     private func getOrCreateRootFolder() async throws -> String? {

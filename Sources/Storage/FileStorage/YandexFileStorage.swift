@@ -148,12 +148,7 @@ final class YandexFileStorage: FileStorage {
             
             logger?.logYandex("Fetched \(reponse.embedded.items.count) resources", level: .info)
             let resources = reponse.embedded.items.map {
-                StorageResource(
-                    name: $0.name,
-                    path: $0.path,
-                    type: $0.toType,
-                    modified: $0.modified
-                )
+                $0.toStorageResouce
             }
             let nextToken = resources.count < limit ? nil : "\(offset + limit)"
             return (resources, nextToken)
@@ -193,7 +188,8 @@ final class YandexFileStorage: FileStorage {
                 parameters: .query(parameters)
             )
             logger?.logYandex("Folder created successfully: \(fullPath)", level: .info)
-            return StorageResource(name: folderName, path: path, type: .dir, modified: "")
+            let folderMetadata = try await getMetadata(for: fullPath)
+            return folderMetadata.toStorageResouce
         } catch {
             logger?.logYandex("Failed to create folder: \(error.localizedDescription)", level: .error)
             throw error
@@ -226,8 +222,10 @@ final class YandexFileStorage: FileStorage {
                 method: reponse.method
             )
             
+            let fileMetadata = try await getMetadata(for: fullPath)
+            
             logger?.logYandex("File created successfully: \(fullPath)", level: .info)
-            return StorageResource(name: fileName, path: path, type: .file(url: "", previewURL: ""), modified: "")
+            return fileMetadata.toStorageResouce
         } catch {
             logger?.logYandex("Failed to create file: \(error.localizedDescription)", level: .error)
             throw error
@@ -336,6 +334,22 @@ final class YandexFileStorage: FileStorage {
             throw error
         }
     }
+
+    private func getMetadata(for path: String) async throws -> YandexStorageResourcesResponse.Embedded.Item {
+        let parameters: Request.Query<String> = ["path": path]
+        
+        let response: YandexStorageResourcesResponse = try await network.dataRequest(
+            url: URL(string: "https://cloud-api.yandex.net/v1/disk/resources")!,
+            method: .get,
+            parameters: .query(parameters)
+        )
+        
+        guard let item = response.embedded.items.first else {
+            throw StorageError.fileNotFound(path)
+        }
+        
+        return item
+    }
 }
 
 extension Logger {
@@ -381,4 +395,28 @@ extension YandexStorageResourcesResponse.Embedded.Item {
         case .file: return .file(url: file!, previewURL: preview)
         }
     }
+    
+    fileprivate var toStorageResouce: StorageResource {
+        StorageResource(
+            name: name,
+            path: path,
+            type: toType,
+            modified: parseYandexDate(modified)
+        )
+    }
+}
+
+private func parseYandexDate(_ dateString: String) -> Date {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    
+    if let date = formatter.date(from: dateString) {
+        return date
+    }
+    
+    formatter.formatOptions = [.withInternetDateTime]
+    if let date = formatter.date(from: dateString) {
+        return date
+    }
+    return Date()
 }

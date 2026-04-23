@@ -64,7 +64,7 @@ final class LocalFileStorage: FileStorage  {
                 name: fileName,
                 path: [resource?.path, fileName].compactMap(\.self).joined(separator: "/"),
                 type: .file(url: "", previewURL: ""),
-                modified: ""
+                modified: getModifiedDate(from: destinationURL)
             )
         } else {
             throw Error.fileNotFound(fileName)
@@ -86,12 +86,11 @@ final class LocalFileStorage: FileStorage  {
         guard isDirectory.boolValue else {
             throw Error.notAFolder(folderName)
         }
-        
         return StorageResource(
             name: folderName,
             path: folderName,
             type: .dir,
-            modified: ""
+            modified: getModifiedDate(from: folderURL)
         )
     }
     
@@ -129,19 +128,21 @@ final class LocalFileStorage: FileStorage  {
         do {
             let subpaths = try fileManager.contentsOfDirectory(
                 at: destinationURL,
-                includingPropertiesForKeys: nil,
+                includingPropertiesForKeys: [.contentModificationDateKey, .creationDateKey, .isDirectoryKey],
                 options: [.skipsHiddenFiles, .skipsPackageDescendants]
             )
             
             logger?.logLocal("Found \(subpaths.count) resources at: \(destinationURL)", level: .info)
-            return (subpaths.map {
+            return try (subpaths.map {
                 let name = $0.lastPathComponent
                 let path = $0.relativePath(from: rootURL) ?? name
+                let resourceValues = try $0.resourceValues(forKeys: [.contentModificationDateKey, .isDirectoryKey])
+                let modifiedDate = resourceValues.contentModificationDate ?? Date()
                 return StorageResource(
                     name: name,
                     path: path,
                     type: $0.isDirectory ? .dir : .file(url: $0.absoluteString, previewURL: $0.absoluteString),
-                    modified: ""
+                    modified: modifiedDate
                 )
             }, nil)
         } catch {
@@ -151,9 +152,10 @@ final class LocalFileStorage: FileStorage  {
     }
     
     func getFolder(at folderName: String) async throws -> StorageResource {
+        let folderURL = rootURL.appendingPathComponent(folderName)
         var isDirectory: ObjCBool = false
         if !fileManager.fileExists(
-            atPath: rootURL.appendingPathComponent(folderName).path,
+            atPath: folderURL.path,
             isDirectory: &isDirectory
         ) {
             throw Error.fileNotFound(folderName)
@@ -163,7 +165,7 @@ final class LocalFileStorage: FileStorage  {
             name: folderName,
             path: folderName,
             type: .dir,
-            modified: ""
+            modified: getModifiedDate(from: folderURL)
         )
     }
     
@@ -174,7 +176,12 @@ final class LocalFileStorage: FileStorage  {
         do {
             try fileManager.createDirectory(at: destinationURL, withIntermediateDirectories: true)
             logger?.logLocal("Folder created successfully: \(path)", level: .info)
-            return StorageResource(name: folderName, path: path, type: .dir, modified: "")
+            return StorageResource(
+                name: folderName,
+                path: path,
+                type: .dir,
+                modified: getModifiedDate(from: destinationURL)
+            )
         } catch {
             logger?.logLocal("Failed to create folder: \(path) - \(error.localizedDescription)", level: .error)
             throw error
@@ -194,7 +201,12 @@ final class LocalFileStorage: FileStorage  {
         let created = fileManager.createFile(atPath: destinationURL.path, contents: data)
         if created {
             logger?.logLocal("File created successfully: \(path)", level: .info)
-            return StorageResource(name: destinationURL.lastPathComponent, path: path, type: .dir, modified: "")
+            return StorageResource(
+                name: destinationURL.lastPathComponent,
+                path: path,
+                type: .dir,
+                modified: getModifiedDate(from: destinationURL)
+            )
         } else {
             logger?.logLocal("File creation returned false: \(path)", level: .warning)
             throw Error.fileNotCreated
@@ -297,6 +309,16 @@ final class LocalFileStorage: FileStorage  {
         } catch {
             logger?.logLocal("Delete all failed: \(error.localizedDescription)", level: .error)
             throw error
+        }
+    }
+    
+    private func getModifiedDate(from url: URL) -> Date {
+        do {
+            let values = try url.resourceValues(forKeys: [.contentModificationDateKey])
+            return values.contentModificationDate ?? Date()
+        } catch {
+            logger?.logLocal("Failed to get modification date for \(url.path): \(error)", level: .warning)
+            return Date()
         }
     }
 }

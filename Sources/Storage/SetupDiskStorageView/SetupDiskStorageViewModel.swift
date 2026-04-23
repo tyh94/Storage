@@ -57,7 +57,7 @@ final class SetupDiskStorageViewModel {
         do {
             let token = try await diskActivator.authorize()
             try tokenStorage.saveToken(token)
-            let rootResource = StorageResource(name: "", path: "", type: .dir, modified: "")
+            let rootResource = StorageResource(name: "", path: "", type: .dir, modified: Date())
             let fileStorage = fileStorageBuilder(rootResource)
             self.fileStorage = fileStorage
 
