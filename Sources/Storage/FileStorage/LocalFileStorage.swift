@@ -204,7 +204,7 @@ final class LocalFileStorage: FileStorage  {
             return StorageResource(
                 name: destinationURL.lastPathComponent,
                 path: path,
-                type: .dir,
+                type: .file(url: destinationURL.absoluteString, previewURL: destinationURL.absoluteString),
                 modified: getModifiedDate(from: destinationURL)
             )
         } else {
