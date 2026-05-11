@@ -27,17 +27,20 @@ final class YandexDiskStorage: DiskStorageActivator {
     
     private let clientID: String
     private let logger: Logger?
+    private let tokenStorage: TokenStorage
     
     @MainActor private var authorizationContinuation: CheckedContinuation<String, Error>?
     
     init(
         type: DiskStorageActivatorType,
         clientID: String,
+        tokenStorage: TokenStorage,
         logger: Logger? = nil
     ) {
         self.type = type
         self.clientID = clientID
         self.logger = logger
+        self.tokenStorage = tokenStorage
         YandexLoginSDK.shared.add(observer: self)
     }
     
@@ -45,12 +48,12 @@ final class YandexDiskStorage: DiskStorageActivator {
         try YandexLoginSDK.shared.activate(with: clientID)
     }
     
-    @MainActor func authorize() async throws -> String {
+    @MainActor func authorizeAndSaveToken() async throws {
         guard let rootViewController = await getRootViewController() else {
             throw StorageError.invalidRootViewController
         }
         
-        return try await withCheckedThrowingContinuation { continuation in
+        let token = try await withCheckedThrowingContinuation { continuation in
             self.authorizationContinuation = continuation
             do {
                 try activate()
@@ -63,6 +66,7 @@ final class YandexDiskStorage: DiskStorageActivator {
                 continuation.resume(throwing: error)
             }
         }
+        try tokenStorage.saveToken(token)
     }
     
     func handleURL(_ url: URL) -> Bool {

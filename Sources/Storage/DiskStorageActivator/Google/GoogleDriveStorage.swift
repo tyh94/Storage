@@ -6,6 +6,7 @@
 //
 
 import GoogleSignIn
+import MKVNetwork
 import UIKit
 
 final class GoogleDriveStorage: DiskStorageActivator {
@@ -31,6 +32,7 @@ final class GoogleDriveStorage: DiskStorageActivator {
     
     private let clientID: String
     private let scopes: [String]
+    private let tokenStorage: TokenStorage
     private let logger: Logger?
     
     @MainActor private var authorizationContinuation: CheckedContinuation<String, Error>?
@@ -38,12 +40,14 @@ final class GoogleDriveStorage: DiskStorageActivator {
     init(
         type: DiskStorageActivatorType,
         clientID: String,
+        tokenStorage: TokenStorage,
         scopes: [String] = ["https://www.googleapis.com/auth/drive"],
         logger: Logger? = nil
     ) {
         self.type = type
         self.clientID = clientID
         self.scopes = scopes
+        self.tokenStorage = tokenStorage
         self.logger = logger
         
         GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
@@ -53,17 +57,19 @@ final class GoogleDriveStorage: DiskStorageActivator {
         // Конфигурация уже выполнена в init
     }
     
-    @MainActor func authorize() async throws -> String {
+    @MainActor func authorizeAndSaveToken() async throws {
         // Если уже авторизован - возвращаем токен
         if let currentUser = GIDSignIn.sharedInstance.currentUser {
-            return currentUser.accessToken.tokenString
+            let token = currentUser.accessToken.tokenString
+            try tokenStorage.saveToken(token)
+            return
         }
         
         guard let rootVC = await getRootViewController() else {
             throw StorageError.invalidRootViewController
         }
         
-        return try await withCheckedThrowingContinuation { continuation in
+        let token = try await withCheckedThrowingContinuation { continuation in
             self.authorizationContinuation = continuation
             
             GIDSignIn.sharedInstance.signIn(
@@ -89,6 +95,7 @@ final class GoogleDriveStorage: DiskStorageActivator {
                 authorizationContinuation = nil
             }
         }
+        try tokenStorage.saveToken(token)
     }
     
     func logout() {

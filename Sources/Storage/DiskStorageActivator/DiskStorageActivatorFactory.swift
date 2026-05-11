@@ -6,14 +6,29 @@
 //
 
 import Foundation
+import MKVNetwork
 
 public enum DiskStorageActivatorFactory {
-    public static func build(_ type: DiskStorageActivatorType, logger: Logger? = nil) -> DiskStorageActivator {
+    public static func build(
+        _ type: DiskStorageActivatorType,
+        tokenStorage: TokenStorage,
+        logger: Logger? = nil
+    ) -> DiskStorageActivator {
         switch type {
         case let .yandexDisk(clientID):
-            return YandexDiskStorage(type: type, clientID: clientID, logger: logger)
+            return YandexDiskStorage(
+                type: type,
+                clientID: clientID,
+                tokenStorage: tokenStorage,
+                logger: logger
+            )
         case let .googleDrive(clientID):
-            return GoogleDriveStorage(type: type, clientID: clientID, logger: logger)
+            return GoogleDriveStorage(
+                type: type,
+                clientID: clientID,
+                tokenStorage: tokenStorage,
+                logger: logger
+            )
         }
     }
 }

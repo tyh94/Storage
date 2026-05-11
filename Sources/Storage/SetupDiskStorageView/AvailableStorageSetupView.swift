@@ -13,7 +13,6 @@ struct StorageSetupWrapper: Identifiable {
     let name: LocalizedStringKey
     let activator: DiskStorageActivator
     let storageBuilder: (StorageResource) -> FileStorage
-    let tokenStorage: TokenStorage
     let base: any AvailableStorageSetup
     
     init(_ setup: any AvailableStorageSetup) {
@@ -21,7 +20,6 @@ struct StorageSetupWrapper: Identifiable {
         self.name = setup.name
         self.activator = setup.activator
         self.storageBuilder = setup.storageBuilder
-        self.tokenStorage = setup.tokenStorage
         self.base = setup
     }
 }
@@ -53,7 +51,6 @@ public struct AvailableStorageSetupView: View {
                 viewModel: SetupDiskStorageViewModel(
                     storageName: setup.name,
                     diskActivator: setup.activator,
-                    tokenStorage: setup.tokenStorage,
                     fileStorageBuilder: setup.storageBuilder,
                     folderChosen: {
                         dismiss()

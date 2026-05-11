@@ -14,7 +14,6 @@ public protocol AvailableStorageSetup: Identifiable {
     
     var storageBuilder: (StorageResource) -> FileStorage { get }
     var activator: DiskStorageActivator { get }
-    var tokenStorage: TokenStorage { get }
 }
 
 struct AvailableStorageSetupMock: AvailableStorageSetup {
@@ -22,5 +21,4 @@ struct AvailableStorageSetupMock: AvailableStorageSetup {
     let name: LocalizedStringKey = "Storage name"
     let storageBuilder: (StorageResource) -> FileStorage = { _ in FileStorageMock() }
     let activator: DiskStorageActivator = DiskStorageActivatorMock()
-    let tokenStorage: TokenStorage = TokenStorageMock()
 }

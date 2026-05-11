@@ -14,9 +14,7 @@ public struct DiskStorageActivatorMock: DiskStorageActivator {
     
     public init() {}
     
-    public func authorize() async throws -> String {
-        ""
-    }
+    public func authorizeAndSaveToken() async throws {}
     
     public func handleURL(_ url: URL) -> Bool {
         true

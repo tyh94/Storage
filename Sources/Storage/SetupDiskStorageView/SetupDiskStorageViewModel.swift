@@ -34,20 +34,17 @@ final class SetupDiskStorageViewModel {
     private var fileStorage: FileStorage?
     
     private let diskActivator: DiskStorageActivator
-    private let tokenStorage: TokenStorage // TODO: dublicate at storage
     private let fileStorageBuilder: (StorageResource) -> (FileStorage)
     private let folderChosen: (StorageResource) -> Void
     
     init(
         storageName: LocalizedStringKey,
         diskActivator: DiskStorageActivator,
-        tokenStorage: TokenStorage,
         fileStorageBuilder: @escaping (StorageResource) -> (FileStorage),
         folderChosen: @escaping (StorageResource) -> Void
     ) {
         self.storageName = storageName
         self.diskActivator = diskActivator
-        self.tokenStorage = tokenStorage
         self.fileStorageBuilder = fileStorageBuilder
         self.folderChosen = folderChosen
     }
@@ -55,8 +52,7 @@ final class SetupDiskStorageViewModel {
     func onAppear() async {
         status = .loading
         do {
-            let token = try await diskActivator.authorize()
-            try tokenStorage.saveToken(token)
+            try await diskActivator.authorizeAndSaveToken()
             let rootResource = StorageResource(name: "", path: "", type: .dir, modified: Date())
             let fileStorage = fileStorageBuilder(rootResource)
             self.fileStorage = fileStorage

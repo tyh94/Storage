@@ -12,7 +12,7 @@ public protocol DiskStorageActivator: Sendable {
     var type: DiskStorageActivatorType { get }
     
     func activate() throws
-    @MainActor func authorize() async throws -> String
+    @MainActor func authorizeAndSaveToken() async throws
     @discardableResult
     func handleURL(_ url: URL) -> Bool
 }

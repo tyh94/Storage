@@ -128,7 +128,6 @@ import MKVNetwork
             viewModel: SetupDiskStorageViewModel(
                 storageName: "Test",
                 diskActivator: DiskStorageActivatorMock(),
-                tokenStorage: TokenStorageMock(),
                 fileStorageBuilder: { _ in FileStorageMock() },
                 folderChosen: { _ in
                     
