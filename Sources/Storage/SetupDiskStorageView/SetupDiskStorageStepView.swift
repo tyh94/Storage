@@ -13,7 +13,6 @@ struct SetupDiskStorageView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var paths = [SetupDiskStorageViewModel.Step]()
-    
     @ViewBuilder
     var content: some View {
         switch viewModel.status {
@@ -31,18 +30,45 @@ struct SetupDiskStorageView: View {
             VStack {
                 ProgressView()
             }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         case let .error(error):
-            VStack {
-                Text("Error: \(error.localizedDescription)", bundle: .module)
-                .foregroundColor(.red)
-                Button {
-                    Task { await viewModel.onAppear() }
-                } label: {
-                    Text("Retry", bundle: .module)
+            VStack(spacing: 20) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.system(size: 50))
+                    .foregroundColor(.orange)
+                
+                Text("Something went wrong", bundle: .module)
+                    .font(.headline)
+                
+                Text(error)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                
+                HStack(spacing: 16) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Text("Close", bundle: .module)
+                            .frame(minWidth: 100)
+                    }
+                    .buttonStyle(.bordered)
+                    
+                    Button {
+                        Task {
+                            await viewModel.onAppear()
+                        }
+                    } label: {
+                        Text("Retry", bundle: .module)
+                            .frame(minWidth: 100)
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
+                .padding(.top, 8)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(.systemBackground))
         }
     }
     
@@ -50,6 +76,11 @@ struct SetupDiskStorageView: View {
         content
             .task {
                 await viewModel.onAppear()
+            }
+            .onAppear {
+                viewModel.onAuthorizationCancelled = {
+                    dismiss()
+                }
             }
     }
 }

@@ -58,45 +58,52 @@ final class GoogleDriveStorage: DiskStorageActivator {
     }
     
     @MainActor func authorizeAndSaveToken() async throws {
-        // Если уже авторизован - возвращаем токен
         if let currentUser = GIDSignIn.sharedInstance.currentUser {
             let token = currentUser.accessToken.tokenString
             try tokenStorage.saveToken(token)
             return
         }
-        
+
         guard let rootVC = await getRootViewController() else {
             throw StorageError.invalidRootViewController
         }
-        
-        let token = try await withCheckedThrowingContinuation { continuation in
-            self.authorizationContinuation = continuation
-            
+
+        let token = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<String, Error>) in
             GIDSignIn.sharedInstance.signIn(
                 withPresenting: rootVC,
                 hint: nil,
                 additionalScopes: scopes
-            ) { [weak self] result, error in
-                guard let self else { return }
-                if let error = error {
-                    authorizationContinuation?.resume(throwing: error)
-                    authorizationContinuation = nil
+            ) { result, error in
+                let token = result?.user.accessToken.tokenString
+                
+                if let error = error as NSError? {
+                    if error.code == -5 {
+                        continuation.resume(
+                            throwing: DiskStorageActivatorError.authCanceled(
+                                error.localizedDescription
+                            )
+                        )
+                    } else {
+                        continuation.resume(throwing: error)
+                    }
                     return
                 }
                 
-                guard let user = result?.user else {
-                    authorizationContinuation?.resume(throwing: StorageError.notAuthorized)
-                    authorizationContinuation = nil
+                if let error {
+                    continuation.resume(throwing: error)
                     return
                 }
-                
-                let token = user.accessToken.tokenString
-                authorizationContinuation?.resume(returning: token)
-                authorizationContinuation = nil
+                guard let token else {
+                    continuation.resume(throwing: StorageError.notAuthorized)
+                    return
+                }
+                continuation.resume(returning: token)
             }
         }
+
         try tokenStorage.saveToken(token)
     }
+
     
     func logout() {
         GIDSignIn.sharedInstance.signOut()

@@ -11,7 +11,7 @@ import YandexLoginSDK
 import MKVNetwork
 
 final class YandexDiskStorage: DiskStorageActivator {
-    enum StorageError: Error {
+    enum Error: LocalizedError {
         case invalidRootViewController
         
         var errorDescription: String? {
@@ -29,7 +29,7 @@ final class YandexDiskStorage: DiskStorageActivator {
     private let logger: Logger?
     private let tokenStorage: TokenStorage
     
-    @MainActor private var authorizationContinuation: CheckedContinuation<String, Error>?
+    @MainActor private var authorizationContinuation: CheckedContinuation<String, Swift.Error>?
     
     init(
         type: DiskStorageActivatorType,
@@ -50,7 +50,7 @@ final class YandexDiskStorage: DiskStorageActivator {
     
     @MainActor func authorizeAndSaveToken() async throws {
         guard let rootViewController = await getRootViewController() else {
-            throw StorageError.invalidRootViewController
+            throw Error.invalidRootViewController
         }
         
         let token = try await withCheckedThrowingContinuation { continuation in
@@ -81,7 +81,7 @@ final class YandexDiskStorage: DiskStorageActivator {
 }
 
 extension YandexDiskStorage: YandexLoginSDKObserver {
-    func didFinishLogin(with result: Result<LoginResult, Error>) {
+    func didFinishLogin(with result: Result<LoginResult, Swift.Error>) {
         switch result {
         case let .success(loginResult):
             let token = loginResult.token
@@ -91,7 +91,7 @@ extension YandexDiskStorage: YandexLoginSDKObserver {
             }
         case let .failure(error):
             DispatchQueue.main.async {
-                self.authorizationContinuation?.resume(throwing: error)
+                self.authorizationContinuation?.resume(throwing: DiskStorageActivatorError.authCanceled(error))
                 self.authorizationContinuation = nil
             }
         }

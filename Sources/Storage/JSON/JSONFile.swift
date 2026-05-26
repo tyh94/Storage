@@ -20,15 +20,14 @@ public struct JSONFile<T: Decodable> {
 extension FileStorage {
     public func loadJSON<T: Decodable>(
         _ type: T.Type,
-        from resource: StorageResource
+        from resource: StorageResource,
+        logger: Logger? = nil
     ) async throws -> T {
         let data = try await data(for: resource)
-#if DEBUG
         if let jsonString = String(data: data, encoding: .utf8) {
-            print("Полученные данные JSON:")
-            print(jsonString)
+            logger?.info("Полученные данные JSON:", type: .common)
+            logger?.info(jsonString, type: .common)
         }
-#endif
         let decoder = JSONDecoder()
         // Настройте стратегию декодирования дат
         decoder.dateDecodingStrategy = .secondsSince1970

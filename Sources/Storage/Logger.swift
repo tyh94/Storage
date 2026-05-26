@@ -18,6 +18,7 @@ public enum LogMessageType: String {
     case google
     case archive
     case migrate
+    case common
 }
 
 public protocol Logger: Sendable {

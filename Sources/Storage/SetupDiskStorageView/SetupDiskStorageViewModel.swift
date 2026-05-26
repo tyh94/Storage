@@ -37,6 +37,8 @@ final class SetupDiskStorageViewModel {
     private let fileStorageBuilder: (StorageResource) -> (FileStorage)
     private let folderChosen: (StorageResource) -> Void
     
+    var onAuthorizationCancelled: (() -> Void)?
+    
     init(
         storageName: LocalizedStringKey,
         diskActivator: DiskStorageActivator,
@@ -72,6 +74,9 @@ final class SetupDiskStorageViewModel {
             ]
 
             status = .loaded
+        } catch let error as DiskStorageActivatorError {
+            status = .error(error.localizedDescription)
+            onAuthorizationCancelled?()
         } catch {
             status = .error(error.localizedDescription)
         }

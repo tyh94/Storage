@@ -16,3 +16,14 @@ public protocol DiskStorageActivator: Sendable {
     @discardableResult
     func handleURL(_ url: URL) -> Bool
 }
+
+public enum DiskStorageActivatorError: LocalizedError {
+    case authCanceled(Error)
+
+    public var errorDescription: String? {
+        switch self {
+        case .authCanceled(let reason):
+            return "Authorization was cancelled. Reason: \(reason.localizedDescription)"
+        }
+    }
+}
