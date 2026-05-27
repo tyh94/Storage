@@ -159,18 +159,21 @@ final class YandexFileStorage: FileStorage {
     }
     
     private func createPath(for resource: StorageResource?, fileOrFolderName: String?) -> String {
-        var pathRequest: String
-        if let path = resource?.path, path.contains(rootPath) {
-            pathRequest = path
-        } else if let path = resource?.path.replacingOccurrences(of: "disk:/", with: ""), !path.isEmpty {
-            pathRequest = "\(rootPath)/\(path)"
-        } else {
-            pathRequest = rootPath
+        var components: [String] = []
+        
+        if !rootPath.isEmpty {
+            components.append(rootPath)
         }
+        
+        if let path = resource?.path.replacingOccurrences(of: "disk:/", with: ""), !path.isEmpty {
+            components.append(path)
+        }
+        
         if let fileOrFolderName, !fileOrFolderName.isEmpty {
-            pathRequest = pathRequest.appending("/").appending(fileOrFolderName)
+            components.append(fileOrFolderName)
         }
-        return pathRequest
+        
+        return components.joined(separator: "/")
             .replacingOccurrences(of: "//", with: "/")
     }
     
@@ -188,8 +191,8 @@ final class YandexFileStorage: FileStorage {
                 parameters: .query(parameters)
             )
             logger?.logYandex("Folder created successfully: \(fullPath)", level: .info)
-            let folderMetadata = try await getMetadata(for: fullPath)
-            return folderMetadata.toStorageResouce
+            let folderMetadata = try await self.resource(folderName: folderName, at: resource)
+            return folderMetadata
         } catch {
             logger?.logYandex("Failed to create folder: \(error.localizedDescription)", level: .error)
             throw error
@@ -222,10 +225,15 @@ final class YandexFileStorage: FileStorage {
                 method: reponse.method
             )
             
-            let fileMetadata = try await getMetadata(for: fullPath)
+            let fileMetadata = StorageResource(
+                name: fileName,
+                path: fullPath,
+                type: .file(url: fullPath, previewURL: nil),
+                modified: Date()
+            )
             
             logger?.logYandex("File created successfully: \(fullPath)", level: .info)
-            return fileMetadata.toStorageResouce
+            return fileMetadata
         } catch {
             logger?.logYandex("Failed to create file: \(error.localizedDescription)", level: .error)
             throw error
@@ -333,22 +341,6 @@ final class YandexFileStorage: FileStorage {
             logger?.logYandex("Logout failed: \(error.localizedDescription)", level: .error)
             throw error
         }
-    }
-
-    private func getMetadata(for path: String) async throws -> YandexStorageResourcesResponse.Embedded.Item {
-        let parameters: Request.Query<String> = ["path": path]
-        
-        let response: YandexStorageResourcesResponse = try await network.dataRequest(
-            url: URL(string: "https://cloud-api.yandex.net/v1/disk/resources")!,
-            method: .get,
-            parameters: .query(parameters)
-        )
-        
-        guard let item = response.embedded.items.first else {
-            throw StorageError.fileNotFound(path)
-        }
-        
-        return item
     }
 }
 
