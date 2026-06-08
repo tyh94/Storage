@@ -160,23 +160,27 @@ final class YandexFileStorage: FileStorage {
     
     private func createPath(for resource: StorageResource?, fileOrFolderName: String?) -> String {
         var components: [String] = []
-        
-        if !rootPath.isEmpty {
+
+        if let path = resource?.path {
+            if path.contains(rootPath) {
+                components.append(path)
+            } else {
+                components.append(rootPath)
+                components.append(path)
+            }
+        } else {
             components.append(rootPath)
         }
-        
-        if let path = resource?.path.replacingOccurrences(of: "disk:/", with: ""), !path.isEmpty {
-            components.append(path)
-        }
-        
+
         if let fileOrFolderName, !fileOrFolderName.isEmpty {
             components.append(fileOrFolderName)
         }
-        
+
         return components.joined(separator: "/")
             .replacingOccurrences(of: "//", with: "/")
     }
-    
+
+
     func createFolder(at resource: StorageResource?, folderName: String) async throws -> StorageResource {
         let path = [resource?.path, folderName].compactMap { $0 }.joined(separator: "/")
         logger?.logYandex("Creating folder at: \(path)", level: .info)
@@ -318,8 +322,7 @@ final class YandexFileStorage: FileStorage {
     
     func delete(at resource: StorageResource) async throws {
         logger?.logYandex("Deleting item at: \(resource)", level: .warning)
-        let path = resource.path
-        let fullPath = path.contains(rootPath) ? path : "\(rootPath)/\(path)"
+        let fullPath = createPath(for: resource, fileOrFolderName: nil)
         var parameters: Request.Query<String> = ["path": fullPath]
         if resource.type == .dir {
             parameters["recursive"] = "true"
