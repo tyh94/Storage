@@ -180,10 +180,10 @@ final class AvailableStorageSetupYandex: AvailableStorageSetup {
 
     let fileStorageFactory: FileStorageFactory
 
-    lazy var storageBuilder: (StorageResource) -> FileStorage = { folder in
+    lazy var storageBuilder: (StorageResource?) -> FileStorage = { folder in
         self.fileStorageFactory.make(
             .yandex(
-                rootPath: folder.path.isEmpty ? nil : folder.path
+                rootPath: folder.path
             )
         )
     }
@@ -236,11 +236,11 @@ final class AvailableStorageSetupGoogleDrive: AvailableStorageSetup {
 
     let fileStorageFactory: FileStorageFactory
 
-    lazy var storageBuilder: (StorageResource) -> FileStorage = { folder in
+    lazy var storageBuilder: (StorageResource?) -> FileStorage = { folder in
         self.fileStorageFactory.make(
             .googleDrive(
                 apiKey: "YOUR_API_KEY",
-                parentID: folder.name.isEmpty ? nil : folder.id
+                parentID: folder.id
             )
         )
     }

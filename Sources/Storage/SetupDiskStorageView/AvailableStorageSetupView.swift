@@ -12,7 +12,7 @@ struct StorageSetupWrapper: Identifiable {
     let id: String
     let name: LocalizedStringKey
     let activator: DiskStorageActivator
-    let storageBuilder: (StorageResource) -> FileStorage
+    let storageBuilder: (StorageResource?) -> FileStorage
     let base: any AvailableStorageSetup
     
     init(_ setup: any AvailableStorageSetup) {

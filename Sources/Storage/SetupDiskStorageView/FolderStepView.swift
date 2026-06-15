@@ -51,7 +51,7 @@ struct FolderStepView: View {
         }
         .listStyle(.plain)
         .navigationBarBackButtonHidden()
-        .navigationTitle(step.current.name.isEmpty ? Text(viewModel.storageName) : Text(step.current.name))
+        .navigationTitle((step.current?.name ?? "").isEmpty ? Text(viewModel.storageName) : Text(step.current?.name ?? ""))
         .navigationBarTitleDisplayMode(.large)
         .searchable(
             text: $searchText,

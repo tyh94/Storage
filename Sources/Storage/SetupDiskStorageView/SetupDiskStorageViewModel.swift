@@ -13,9 +13,9 @@ import MKVNetwork
 @Observable
 final class SetupDiskStorageViewModel {
     struct Step: Identifiable, Hashable {
-        var id: String { current.path }
+        var id: String { current?.path ?? "" }
         var resources: [StorageResource]
-        let current: StorageResource
+        let current: StorageResource?
         var isLoadingNext: Bool = false
         var nextOffsetToken: String?
     }
@@ -34,7 +34,7 @@ final class SetupDiskStorageViewModel {
     private var fileStorage: FileStorage?
     
     private let diskActivator: DiskStorageActivator
-    private let fileStorageBuilder: (StorageResource) -> (FileStorage)
+    private let fileStorageBuilder: (StorageResource?) -> (FileStorage)
     private let folderChosen: (StorageResource) -> Void
     
     var onAuthorizationCancelled: (() -> Void)?
@@ -42,7 +42,7 @@ final class SetupDiskStorageViewModel {
     init(
         storageName: LocalizedStringKey,
         diskActivator: DiskStorageActivator,
-        fileStorageBuilder: @escaping (StorageResource) -> (FileStorage),
+        fileStorageBuilder: @escaping (StorageResource?) -> (FileStorage),
         folderChosen: @escaping (StorageResource) -> Void
     ) {
         self.storageName = storageName
@@ -55,8 +55,7 @@ final class SetupDiskStorageViewModel {
         status = .loading
         do {
             try await diskActivator.authorizeAndSaveToken()
-            let rootResource = StorageResource(name: "", path: "", type: .dir, modified: Date())
-            let fileStorage = fileStorageBuilder(rootResource)
+            let fileStorage = fileStorageBuilder(nil)
             self.fileStorage = fileStorage
 
             let (resources, nextToken) = try await fileStorage.getResources(
@@ -68,7 +67,7 @@ final class SetupDiskStorageViewModel {
             path = [
                 Step(
                     resources: resources,
-                    current: rootResource,
+                    current: nil,
                     nextOffsetToken: nextToken
                 )
             ]
@@ -105,7 +104,7 @@ final class SetupDiskStorageViewModel {
         }
     }
     
-    func loadNextPage(for resource: StorageResource) async {
+    func loadNextPage(for resource: StorageResource?) async {
         guard let lastStep = path.last,
               lastStep.current == resource,
               let nextToken = lastStep.nextOffsetToken else {
@@ -161,8 +160,8 @@ final class SetupDiskStorageViewModel {
     }
     
     func saveCurrentFolder() async {
-        guard let lastStep = path.last else { return }
+        guard let lastStep = path.last, let folder = lastStep.current else { return }
         
-        folderChosen(lastStep.current)
+        folderChosen(folder)
     }
 }
