@@ -5,7 +5,6 @@ import PackageDescription
 
 let package = Package(
     name: "Storage",
-    defaultLocalization: "en",
     platforms: [.iOS(.v17)],
     products: [
         .library(
@@ -13,16 +12,13 @@ let package = Package(
             targets: ["Storage"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/weichsel/ZIPFoundation.git", from: "0.9.19"),
+        .package(url: "https://github.com/weichsel/ZIPFoundation.git", from: "0.9.20"),
     ],
     targets: [
         .target(
             name: "Storage",
             dependencies: [
                 .product(name: "ZIPFoundation", package: "ZIPFoundation"),
-            ],
-            resources: [
-                .process("Resources")
             ]
         ),
     ]
