@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class LocalFileStorage: FileStorage  {
+public final class LocalFileStorage: FileStorage  {
     enum Error: LocalizedError {
         case fileNotCreated
         case fileNotFound(String)
@@ -37,7 +37,7 @@ final class LocalFileStorage: FileStorage  {
     private let rootURL: URL
     private let logger: Logger?
     
-    init(
+    public init(
         rootURL: URL,
         logger: Logger? = nil
     ) {
@@ -54,7 +54,7 @@ final class LocalFileStorage: FileStorage  {
         }
     }
     
-    func resource(
+    public func resource(
         fileName: String,
         at resource: StorageResource?
     ) async throws -> StorageResource {
@@ -71,7 +71,7 @@ final class LocalFileStorage: FileStorage  {
         }
     }
     
-    func resource(
+    public func resource(
         folderName: String,
         at resource: StorageResource?
     ) async throws -> StorageResource {
@@ -107,7 +107,7 @@ final class LocalFileStorage: FileStorage  {
         }
     }
     
-    func data(for resource: StorageResource) async throws -> Data {
+    public func data(for resource: StorageResource) async throws -> Data {
         try await data(fileName: resource.path)
     }
     
@@ -117,7 +117,7 @@ final class LocalFileStorage: FileStorage  {
         return url
     }
     
-    func getResources(
+    public func getResources(
         at resource: StorageResource?,
         limit: Int,
         offsetToken: String?
@@ -151,7 +151,7 @@ final class LocalFileStorage: FileStorage  {
         }
     }
     
-    func getFolder(at folderName: String) async throws -> StorageResource {
+    public func getFolder(at folderName: String) async throws -> StorageResource {
         let folderURL = rootURL.appendingPathComponent(folderName)
         var isDirectory: ObjCBool = false
         if !fileManager.fileExists(
@@ -169,7 +169,7 @@ final class LocalFileStorage: FileStorage  {
         )
     }
     
-    func createFolder(at resource: StorageResource?, folderName: String) async throws -> StorageResource {
+    public func createFolder(at resource: StorageResource?, folderName: String) async throws -> StorageResource {
         let path = [resource?.path, folderName].compactMap { $0 }.joined(separator: "/")
         logger?.logLocal("Creating folder at: \(path)", level: .info)
         let destinationURL = rootURL.appendingPathComponent(path)
@@ -189,7 +189,7 @@ final class LocalFileStorage: FileStorage  {
     }
     
     @discardableResult
-    func createFile(at resource: StorageResource?, fileName: String, with data: Data?) async throws -> StorageResource {
+    public func createFile(at resource: StorageResource?, fileName: String, with data: Data?) async throws -> StorageResource {
         let path = [resource?.path, fileName].compactMap { $0 }.joined(separator: "/")
         return try createFile(at: path, with: data)
     }
@@ -213,7 +213,7 @@ final class LocalFileStorage: FileStorage  {
         }
     }
     
-    func updateFile(at resource: StorageResource, with data: Data) async throws {
+    public func updateFile(at resource: StorageResource, with data: Data) async throws {
         let path = resource.path
         logger?.logLocal("Updating file at: \(path)", level: .info)
         let destinationURL = rootURL.appendingPathComponent(path)
@@ -231,7 +231,7 @@ final class LocalFileStorage: FileStorage  {
         }
     }
     
-    func renameFile(at resource: StorageResource, with filename: String) async throws {
+    public func renameFile(at resource: StorageResource, with filename: String) async throws {
         guard case let .file(url, _) = resource.type else {
             throw Error.fileNotFound(resource.name)
         }
@@ -248,7 +248,7 @@ final class LocalFileStorage: FileStorage  {
         }
     }
     
-    func renameFolder(at resource: StorageResource, with filename: String) async throws {
+    public func renameFolder(at resource: StorageResource, with filename: String) async throws {
         guard case .dir = resource.type else {
             throw Error.folderNotFound(resource.name)
         }
@@ -275,7 +275,7 @@ final class LocalFileStorage: FileStorage  {
         }
     }
     
-    func moveFile(from pathFrom: String, to pathTo: String) async throws {
+    public func moveFile(from pathFrom: String, to pathTo: String) async throws {
         logger?.logLocal("Moving file from: \(pathFrom) to: \(pathTo)", level: .info)
         do {
             try fileManager.moveItem(
@@ -289,7 +289,7 @@ final class LocalFileStorage: FileStorage  {
         }
     }
     
-    func delete(at resource: StorageResource) async throws {
+    public func delete(at resource: StorageResource) async throws {
         let path = resource.path
         logger?.logLocal("Deleting item at: \(path)", level: .info)
         do {
@@ -301,7 +301,7 @@ final class LocalFileStorage: FileStorage  {
         }
     }
     
-    func deleteAll() async throws {
+    public func deleteAll() async throws {
         logger?.logLocal("Deleting ALL items at root", level: .warning)
         do {
             try fileManager.removeItem(at: rootURL)
