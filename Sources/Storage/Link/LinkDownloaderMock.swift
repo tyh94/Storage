@@ -11,6 +11,6 @@ public struct LinkDownloaderMock: LinkDownloader {
     public init() {}
     
     public func download(for url: URL, progress: Progress) async throws -> URL {
-       throw ""
+       throw NSError(domain: "", code: 1)
     }
 }
